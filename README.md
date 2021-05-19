@@ -4,4 +4,4 @@ This is a template for a web application development environment that uses React
 
 ## Usage
 
-'docker-compose up'
+`docker-compose up`
