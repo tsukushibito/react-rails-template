@@ -8,4 +8,8 @@ This template builds the environment with Docker. Rails is in API mode and has G
 
 ## Usage
 
-`docker-compose up`
+```
+rm -rf .git
+docker-compose build
+docker-compose up
+```
