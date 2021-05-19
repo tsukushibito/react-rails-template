@@ -8,23 +8,23 @@ ARG YARN_VERSION
 
 # PostgreSQLをソースリストに追加
 RUN curl -sSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
-    && echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' $PG_MAJOR > /etc/apt/sources.list.d/pgdg.list
+    && echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' ${PG_MAJOR} > /etc/apt/sources.list.d/pgdg.list
 
 # NodeJSをソースリストに追加
-RUN curl -sL https://deb.nodesource.com/setup_$NODE_MAJOR.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash -
 
 # Yarnをソースリストに追加
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
     && echo 'deb http://dl.yarnpkg.com/debian/ stable main' > /etc/apt/sources.list.d/yarn.list
 
 # アプリケーションの依存関係
-COPY Aptfile /tmp/Aptfile
+COPY docker/app/Aptfile /tmp/Aptfile
 RUN apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get -yq dist-upgrade && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
     libpq-dev \
-    postgresql-client-$PG_MAJOR \
+    postgresql-client-${PG_MAJOR} \
     nodejs \
-    yarn=$YARN_VERSION-1 \
+    yarn=${YARN_VERSION}-1 \
     $(grep -Ev '^\s*#' /tmp/Aptfile | xargs) && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
@@ -37,13 +37,12 @@ ENV LANG=C.UTF-8 \
 
 RUN mkdir /app
 WORKDIR /app
-COPY Gemfile /app/Gemfile
-COPY Gemfile.lock /app/Gemfile.lock
+COPY app/Gemfile /app/Gemfile
+COPY app/Gemfile.lock /app/Gemfile.lock
 RUN bundle install
-COPY . /app
 
 # Add a script to be executed every time the container starts.
-COPY entrypoint.sh /usr/bin/
+COPY docker/app/entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
 EXPOSE 3000
